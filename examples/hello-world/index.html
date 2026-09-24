@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hello Omni</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 16px; }
+    button { margin-top: 12px; padding: 8px 12px; }
+  </style>
+</head>
+<body>
+  <div id="contact">Waiting for a conversation…</div>
+  <button id="hello">Say hello</button>
+
+  <script src="https://omni.botbot.chat/omnijs.js"></script>
+  <script>
+    OmniBotBot.on("conversation", function (conversation) {
+      const c = conversation.contact || {};
+      document.getElementById("contact").textContent = `${c.name || "Unknown"} · ${c.phone || "no phone"} · ${c.email || "no email"}`;
+    });
+    OmniBotBot.on("no_conversation", function () {
+      document.getElementById("contact").textContent = "No conversation selected.";
+    });
+    document.getElementById("hello").addEventListener("click", function () {
+      OmniBotBot.toast("success", "Hello from my plugin!");
+    });
+    OmniBotBot.ready();
+  </script>
+</body>
+</html>

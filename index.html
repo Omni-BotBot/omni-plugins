@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Guias e exemplos para criar plugins do Omni.">
+  <title>Plugins do Omni</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; color: #172033; background: #f4f6fb; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 2rem; box-sizing: border-box; }
+    main { width: min(100%, 48rem); padding: clamp(1.5rem, 5vw, 3.5rem); border: 1px solid #dce2ee; border-radius: 1.25rem; background: #fff; box-shadow: 0 1rem 3rem #17203312; }
+    h1 { margin: 0 0 .75rem; font-size: clamp(2rem, 6vw, 3.25rem); letter-spacing: -.04em; }
+    p { color: #536078; line-height: 1.65; }
+    h2 { margin-top: 2.25rem; font-size: 1.1rem; }
+    ul { display: grid; gap: .75rem; padding: 0; list-style: none; }
+    a { color: #3157c8; text-underline-offset: .2em; }
+    .links { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.5rem; }
+    .links a { padding: .75rem 1rem; border: 1px solid #cbd5e8; border-radius: .65rem; text-decoration: none; font-weight: 650; }
+    .links a:first-child { border-color: #3157c8; color: #fff; background: #3157c8; }
+    footer { margin-top: 2rem; font-size: .9rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Plugins do Omni</h1>
+    <p>Crie integrações que aparecem na barra lateral da conversa e recebem os dados do contato selecionado.</p>
+    <div class="links">
+      <a href="https://github.com/Omni-BotBot/omni-plugins/blob/main/README.md">Guia completo em português</a>
+      <a href="https://github.com/Omni-BotBot/omni-plugins/blob/main/README.en.md" lang="en">English guide</a>
+    </div>
+    <h2>Exemplos</h2>
+    <ul>
+      <li><a href="examples/hello-world/">Hello world</a> — receba a conversa e mostre uma notificação.</li>
+      <li><a href="examples/playground/">Playground</a> — explore os eventos e as ações do SDK.</li>
+    </ul>
+    <footer>SDK: <a href="https://omni.botbot.chat/omnijs.js">omni.botbot.chat/omnijs.js</a></footer>
+  </main>
+</body>
+</html>

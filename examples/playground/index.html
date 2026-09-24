@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en" translate="no" class="bg-card">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omni Plugin Playground</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'media',
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(var(--border))",
+                        input: "hsl(var(--input))",
+                        ring: "hsl(var(--ring))",
+                        background: "hsl(var(--background))",
+                        foreground: "hsl(var(--foreground))",
+                        primary: {
+                            DEFAULT: "hsl(var(--primary))",
+                            foreground: "hsl(var(--primary-foreground))",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(var(--secondary))",
+                            foreground: "hsl(var(--secondary-foreground))",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(var(--destructive))",
+                            foreground: "hsl(var(--destructive-foreground))",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(var(--muted))",
+                            foreground: "hsl(var(--muted-foreground))",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(var(--accent))",
+                            foreground: "hsl(var(--accent-foreground))",
+                        },
+                        popover: {
+                            DEFAULT: "hsl(var(--popover))",
+                            foreground: "hsl(var(--popover-foreground))",
+                        },
+                        card: {
+                            DEFAULT: "hsl(var(--card))",
+                            foreground: "hsl(var(--card-foreground))",
+                        },
+                    },
+                    borderRadius: {
+                        lg: "var(--radius)",
+                        md: "calc(var(--radius) - 2px)",
+                        sm: "calc(var(--radius) - 4px)",
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        :root {
+            --background: 220 20% 97%;
+            --foreground: 220 25% 10%;
+            --card: 0 0% 100%;
+            --card-foreground: 220 25% 10%;
+            --popover: 0 0% 100%;
+            --popover-foreground: 220 25% 10%;
+            --primary: 160 84% 32%;
+            --primary-foreground: 0 0% 100%;
+            --secondary: 220 14% 92%;
+            --secondary-foreground: 220 25% 20%;
+            --muted: 220 14% 95%;
+            --muted-foreground: 220 10% 46%;
+            --accent: 152 45% 92%;
+            --accent-foreground: 160 72% 22%;
+            --destructive: 0 72% 51%;
+            --destructive-foreground: 0 0% 100%;
+            --border: 220 13% 90%;
+            --input: 220 13% 90%;
+            --ring: 160 84% 32%;
+            --radius: 0.5rem;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background: 0 0% 7%;
+                --foreground: 0 0% 90%;
+                --card: 0 0% 7%;
+                --card-foreground: 0 0% 90%;
+                --popover: 0 0% 11%;
+                --popover-foreground: 0 0% 90%;
+                --primary: 160 78% 30%;
+                --primary-foreground: 0 0% 100%;
+                --secondary: 0 0% 14%;
+                --secondary-foreground: 0 0% 82%;
+                --muted: 0 0% 12%;
+                --muted-foreground: 0 0% 55%;
+                --accent: 0 0% 16%;
+                --accent-foreground: 0 0% 92%;
+                --destructive: 0 62% 50%;
+                --destructive-foreground: 0 0% 100%;
+                --border: 0 0% 18%;
+                --input: 0 0% 18%;
+                --ring: 160 78% 30%;
+            }
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: transparent;
+            margin: 0;
+            padding: 0;
+            color: hsl(var(--foreground));
+        }
+    </style>
+</head>
+<body class="p-0 bg-transparent">
+    <div class="card p-4 space-y-6 text-card-foreground border-0 shadow-none rounded-none">
+        <h1 class="text-lg font-bold text-foreground">Omni Plugin Playground</h1>
+
+        <div id="conversation-info" class="text-sm space-y-1 p-3 rounded-md bg-muted text-muted-foreground border border-border">
+            <p>Waiting for conversation...</p>
+        </div>
+
+        <section class="space-y-3">
+            <h2 class="section-title text-xs font-semibold text-muted-foreground uppercase tracking-wider">Dialogs</h2>
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="showConfirm()" class="bg-primary text-primary-foreground hover:bg-primary/90 px-3 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
+                    Show Confirm
+                </button>
+                <button onclick="showAlert()" class="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-3 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
+                    Show Alert
+                </button>
+            </div>
+        </section>
+
+        <section class="space-y-3">
+            <h2 class="section-title text-xs font-semibold text-muted-foreground uppercase tracking-wider">Toasts</h2>
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="OmniBotBot.toast('success', 'Operation completed successfully!')" class="bg-primary text-primary-foreground hover:bg-primary/90 px-3 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
+                    Success Toast
+                </button>
+                <button onclick="OmniBotBot.toast('error', 'Something went wrong!')" class="bg-destructive text-destructive-foreground hover:bg-destructive/90 px-3 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
+                    Error Toast
+                </button>
+                <button onclick="OmniBotBot.toast('warning', 'Please be careful.')" class="bg-yellow-500 text-white hover:bg-yellow-600 px-3 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
+                    Warning Toast
+                </button>
+                <button onclick="OmniBotBot.toast('info', 'Just for your information.')" class="bg-blue-500 text-white hover:bg-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
+                    Info Toast
+                </button>
+            </div>
+        </section>
+
+        <section class="space-y-3">
+            <h2 class="section-title text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</h2>
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="getWorkspace()" class="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-3 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
+                    Workspace Info
+                </button>
+                <button onclick="toggleLoading()" class="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-3 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
+                    Toggle Loading
+                </button>
+                <button onclick="updateNotes()" class="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-3 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
+                    Update Notes
+                </button>
+                <button onclick="testLabels()" class="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-3 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
+                    Test Labels
+                </button>
+            </div>
+        </section>
+
+        <section id="debug-panel" class="mt-8 pt-4 border-t border-border">
+            <h2 class="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span>
+                Debug: Workspace Properties
+            </h2>
+            <div class="bg-slate-900 text-slate-300 p-4 rounded-lg font-mono text-[10px] overflow-auto max-h-60 shadow-inner border border-slate-800">
+                <pre id="debug-workspace-json" class="whitespace-pre-wrap">Waiting for workspace info...</pre>
+            </div>
+            <button onclick="getWorkspace()" class="mt-2 text-[10px] bg-secondary text-secondary-foreground hover:bg-secondary/80 px-2 py-1 rounded transition-colors border border-border">
+                Refresh Workspace Data
+            </button>
+        </section>
+
+        <section id="debug-agent-panel" class="mt-8 pt-4 border-t border-border">
+            <h2 class="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                Debug: Agent Info
+            </h2>
+            <div class="bg-slate-900 text-slate-300 p-4 rounded-lg font-mono text-[10px] overflow-auto max-h-60 shadow-inner border border-slate-800">
+                <pre id="debug-agent-json" class="whitespace-pre-wrap">Waiting for agent info...</pre>
+            </div>
+            <button onclick="getAgent()" class="mt-2 text-[10px] bg-secondary text-secondary-foreground hover:bg-secondary/80 px-2 py-1 rounded transition-colors border border-border">
+                Refresh Agent Data
+            </button>
+        </section>
+
+        <section id="debug-conversation-panel" class="mt-8 pt-4 border-t border-border">
+            <h2 class="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                Debug: Conversation Info
+            </h2>
+            <div class="bg-slate-900 text-slate-300 p-4 rounded-lg font-mono text-[10px] overflow-auto max-h-60 shadow-inner border border-slate-800">
+                <pre id="debug-conversation-json" class="whitespace-pre-wrap">Waiting for conversation info...</pre>
+            </div>
+            <button onclick="getConversation()" class="mt-2 text-[10px] bg-secondary text-secondary-foreground hover:bg-secondary/80 px-2 py-1 rounded transition-colors border border-border">
+                Refresh Conversation Data
+            </button>
+        </section>
+    </div>
+
+    <!-- The Omni plugin SDK. Always load it from Omni so you get fixes automatically. -->
+    <script src="https://omni.botbot.chat/omnijs.js"></script>
+    <script>
+        let currentConversation = null;
+
+        // Listen for conversation events
+        OmniBotBot.on("conversation", function(data) {
+            currentConversation = data;
+            const info = document.getElementById("conversation-info");
+            info.replaceChildren(
+                infoLine("Contact", (data.contact && data.contact.name) || "Unknown"),
+                infoLine("Status", data.status),
+                infoLine("Labels", (data.labels || []).join(", ") || "None"),
+            );
+            // Also update the debug panel if it exists
+            const debugJson = document.getElementById("debug-conversation-json");
+            if (debugJson) {
+                debugJson.textContent = JSON.stringify(data, null, 2);
+            }
+        });
+
+        OmniBotBot.on("no_conversation", function() {
+            currentConversation = null;
+            document.getElementById("conversation-info").replaceChildren(infoLine("Conversation", "none selected"));
+            // Clear debug panel
+            const debugJson = document.getElementById("debug-conversation-json");
+            if (debugJson) {
+                debugJson.textContent = "No active conversation.";
+            }
+        });
+
+        function infoLine(label, value) {
+            const line = document.createElement("p");
+            const strong = document.createElement("strong");
+            strong.textContent = label + ": ";
+            line.append(strong, String(value));
+            return line;
+        }
+
+        // The SDK keeps only ONE pending callback, so each getter accepts a "next"
+        // step that runs inside its callback instead of firing all three at once.
+        function getWorkspace(next) {
+            OmniBotBot.getWorkspaceInfo(function(data) {
+                console.log("Workspace info:", data);
+                document.getElementById("debug-workspace-json").textContent = JSON.stringify(data, null, 2);
+                if (next) next();
+            });
+        }
+
+        function getAgent(next) {
+            OmniBotBot.getAgentInfo(function(data) {
+                console.log("Agent info:", data);
+                document.getElementById("debug-agent-json").textContent = JSON.stringify(data, null, 2);
+                if (next) next();
+            });
+        }
+
+        function getConversation() {
+            OmniBotBot.getConversationInfo(function(data) {
+                console.log("Conversation info:", data);
+                document.getElementById("debug-conversation-json").textContent = JSON.stringify(data, null, 2);
+            });
+        }
+
+        // Tell Omni the plugin is listening (Omni then re-sends the conversation),
+        // and fill the debug panels one after another.
+        OmniBotBot.ready();
+        getWorkspace(function() {
+            getAgent(getConversation);
+        });
+
+        function toggleLoading() {
+            OmniBotBot.loading(true);
+            setTimeout(() => OmniBotBot.loading(false), 2000);
+        }
+
+        function updateNotes() {
+            if (!currentConversation) {
+                OmniBotBot.toast("error", "No conversation selected");
+                return;
+            }
+            const newNote = "Updated from plugin at " + new Date().toLocaleTimeString();
+            OmniBotBot.setProperty({ notes: newNote });
+            OmniBotBot.toast("info", "Updating notes...");
+        }
+
+        function showConfirm() {
+            OmniBotBot.showConfirm({
+                title: "Confirm Action",
+                description: "Are you sure you want to proceed with this plugin action?",
+                okText: "Yes, do it",
+                cancelText: "No, stop"
+            }, function(confirmed) {
+                OmniBotBot.toast(confirmed ? "success" : "warning", "User confirmed: " + confirmed);
+            });
+        }
+
+        function showAlert() {
+            OmniBotBot.showAlert({
+                title: "Information",
+                description: "This is an alert from the plugin.",
+                okText: "Got it"
+            }, function() {
+                OmniBotBot.toast("info", "Alert was closed");
+            });
+        }
+
+        function testLabels() {
+            OmniBotBot.getWorkspaceInfo(function(data) {
+                if (data.labels && data.labels.length > 0) {
+                    const firstLabel = data.labels[0];
+                    OmniBotBot.toast("info", "Adding label: " + firstLabel.name);
+                    OmniBotBot.addLabel(firstLabel.id);
+
+                    setTimeout(() => {
+                        OmniBotBot.toast("info", "Removing label: " + firstLabel.name);
+                        OmniBotBot.removeLabel(firstLabel.id);
+                    }, 3000);
+                } else {
+                    OmniBotBot.toast("error", "No labels found in workspace");
+                }
+            });
+        }
+    </script>
+</body>
+</html>
