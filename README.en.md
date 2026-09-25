@@ -80,7 +80,7 @@ Open Omni → **Integrations** → **Plugins** → **Add Plugin**:
 | **Endpoint URL (HTTPS)** | Your page, e.g. `https://yourapp.com/omni`. |
 | **Height (pixels)** | Card height, from `100` to `2000`. Default `600`. |
 | **Visibility** | No role selected = every agent sees it. Select roles to limit it. **Just for me** = only you. |
-| **Auth Secret** | Saved in Omni but **not** sent to your plugin. To identify the workspace, put a secret token in the endpoint URL, e.g. `https://yourapp.com/omni/<token>`. |
+| **Auth Secret** | Optional. With a secret, Omni signs every conversation it sends to the plugin (the [`context_token`](#signed-context-token) event), so your server can trust the contact it receives. Without one, nothing is signed. |
 
 Click **Create Plugin**. Done.
 
@@ -106,6 +106,7 @@ Subscribe with `OmniBotBot.on(event, handler)`.
 | `conversation` | An agent opens a conversation. Supported for existing integrations. | [Conversation payload](#conversation-payload) |
 | `thread` | Same moment and same payload as `conversation`, with Omni's name. Subscribe to one, not both. | [Conversation payload](#conversation-payload) |
 | `no_conversation` | No conversation is selected. | none |
+| `context_token` | Same moment as `thread`, only when the plugin has an **Auth Secret**. | `{ conversationId, token, expiresAt }`. See [Signed context token](#signed-context-token). |
 
 Omni sends them when your page loads, whenever the agent switches conversation, and after you call `ready()`.
 
@@ -150,6 +151,33 @@ Omni sends them when your page loads, whenever the agent switches conversation, 
 
 `id`, `contact.*`, `channel`, `status`, `priority`, `labels` and `assignedAgent` are stable. Other fields may change. `phone` is as stored by Omni: strip non-digits before matching it with your data.
 
+### Signed context token
+
+The `conversation` and `thread` events come from the agent's browser and are not signed: do not use their phone or email to unlock sensitive data. For that, set an **Auth Secret**. Omni's server reads the contact from its own database and signs the conversation with that secret.
+
+`token` is a compact JWT (RFC 7515) with header `{"alg":"HS256","typ":"JWT"}`, signed with HMAC-SHA256 using the secret. `token: null` means Omni could not mint a token. `expiresAt` is the `exp` in Unix seconds. Send the token to your backend and verify there:
+
+1. The signature, with a constant-time comparison. Reject any `alg` other than `HS256`.
+2. `iss` is `https://omni.botbot.chat` and `aud` is the origin of the plugin endpoint (`scheme://host[:port]`, e.g. `https://yourapp.com`).
+3. `exp` has not passed. Each token lasts 5 minutes. When you call `ready()`, Omni re-sends the current token and mints a new one only when it has 1 minute or less left.
+
+```json
+{
+  "iss": "https://omni.botbot.chat",
+  "aud": "https://yourapp.com",
+  "iat": 1790000000,
+  "exp": 1790000300,
+  "jti": "0b6f7f3e-6c2a-4d0e-9d8e-0a3f1c2b4d5e",
+  "plugin_id": "Xy7Qa2Lm",
+  "workspace_id": "Pq4Rs8Tu",
+  "conversation_id": "k5Qx8LmN",
+  "contact": { "id": "Rz3pW9aB", "name": "Ada Lovelace", "phone": "+55 11 99999-9999", "email": "ada@example.com" },
+  "agent": { "id": "Jm2Yt7cD", "name": "Grace Hopper", "is_owner": false }
+}
+```
+
+`contact` is `null` when the conversation has no customer contact.
+
 ### Actions
 
 | Method | What it does | Argument |
@@ -166,7 +194,7 @@ Omni sends them when your page loads, whenever the agent switches conversation, 
 | `getWorkspaceInfo(cb)` | Reads workspace data. | `cb({ agents: [{ id, display_name, … }], groups: [{ id, name }], contacts_groups: [{ id, name }], labels: [{ id, name, color }] })` |
 | `getAgentInfo(cb)` | Reads the signed-in agent. | `cb(agent)` |
 | `getConversationInfo(cb)` | Reads the current conversation. | `cb(conversation)`: the [payload](#conversation-payload). |
-| `ready()` | Tells Omni your page is listening. Omni re-sends the conversation. | none |
+| `ready()` | Tells Omni your page is listening. Omni re-sends the conversation and, when a secret is set, the `context_token`. | none |
 
 Only one callback can be pending at a time: call the next getter inside the previous callback.
 

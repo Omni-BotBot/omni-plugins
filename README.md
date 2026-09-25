@@ -80,7 +80,7 @@ Abra o Omni → **Integrações** → **Plugins** → **Adicionar Plugin**:
 | **URL do endpoint (HTTPS)** | Sua página, ex.: `https://seuapp.com/omni`. |
 | **Altura (pixels)** | Altura do card, de `100` a `2000`. Padrão `600`. |
 | **Visibilidade** | Nenhuma função marcada = todos os agentes veem. Marque funções para limitar. **Só para mim** = só você. |
-| **Segredo de autenticação** | Fica salvo no Omni, mas **não** é enviado ao seu plugin. Para identificar o workspace, coloque um token secreto na URL do endpoint, ex.: `https://seuapp.com/omni/<token>`. |
+| **Segredo de autenticação** | Opcional. Com um segredo, o Omni assina cada conversa enviada ao plugin (evento [`context_token`](#token-de-contexto-assinado)), e seu servidor pode confiar no contato recebido. Sem segredo, nada é assinado. |
 
 Clique em **Criar Plugin**. Pronto.
 
@@ -106,6 +106,7 @@ Assine com `OmniBotBot.on(evento, handler)`.
 | `conversation` | Um agente abre uma conversa. Compatível com integrações existentes. | [Payload da conversa](#payload-da-conversa) |
 | `thread` | Mesmo momento e mesmo payload de `conversation`, com o nome do Omni. Assine um dos dois, não ambos. | [Payload da conversa](#payload-da-conversa) |
 | `no_conversation` | Nenhuma conversa selecionada. | nenhum |
+| `context_token` | Mesmo momento de `thread`, só quando o plugin tem **Segredo de autenticação**. | `{ conversationId, token, expiresAt }`. Veja [Token de contexto assinado](#token-de-contexto-assinado). |
 
 O Omni envia esses eventos quando sua página carrega, sempre que o agente troca de conversa e depois que você chama `ready()`.
 
@@ -150,6 +151,33 @@ O Omni envia esses eventos quando sua página carrega, sempre que o agente troca
 
 `id`, `contact.*`, `channel`, `status`, `priority`, `labels` e `assignedAgent` são estáveis. Os demais campos podem mudar. `phone` vem como está salvo no Omni: remova tudo que não for dígito antes de comparar com seus dados.
 
+### Token de contexto assinado
+
+Os eventos `conversation` e `thread` vêm do navegador do agente e não são assinados: não use o telefone ou o e-mail deles para liberar dados sensíveis. Para isso, cadastre um **Segredo de autenticação**. O servidor do Omni lê o contato do próprio banco e assina a conversa com esse segredo.
+
+`token` é um JWT compacto (RFC 7515) com header `{"alg":"HS256","typ":"JWT"}`, assinado com HMAC-SHA256 usando o segredo. `token: null` significa que o Omni não conseguiu gerar o token. `expiresAt` é o `exp` em segundos Unix. Envie o token ao seu backend e valide lá:
+
+1. A assinatura, com comparação em tempo constante. Recuse qualquer `alg` diferente de `HS256`.
+2. `iss` é `https://omni.botbot.chat` e `aud` é a origem do endpoint do plugin (`scheme://host[:porta]`, ex.: `https://seuapp.com`).
+3. `exp` não passou. Cada token vale 5 minutos. Ao chamar `ready()`, o Omni reenvia o token atual e só gera um novo quando faltar 1 minuto ou menos para ele expirar.
+
+```json
+{
+  "iss": "https://omni.botbot.chat",
+  "aud": "https://seuapp.com",
+  "iat": 1790000000,
+  "exp": 1790000300,
+  "jti": "0b6f7f3e-6c2a-4d0e-9d8e-0a3f1c2b4d5e",
+  "plugin_id": "Xy7Qa2Lm",
+  "workspace_id": "Pq4Rs8Tu",
+  "conversation_id": "k5Qx8LmN",
+  "contact": { "id": "Rz3pW9aB", "name": "Ada Lovelace", "phone": "+55 11 99999-9999", "email": "ada@example.com" },
+  "agent": { "id": "Jm2Yt7cD", "name": "Grace Hopper", "is_owner": false }
+}
+```
+
+`contact` é `null` quando a conversa não tem contato de cliente.
+
 ### Ações
 
 | Método | O que faz | Argumento |
@@ -166,7 +194,7 @@ O Omni envia esses eventos quando sua página carrega, sempre que o agente troca
 | `getWorkspaceInfo(cb)` | Lê dados do workspace. | `cb({ agents: [{ id, display_name, … }], groups: [{ id, name }], contacts_groups: [{ id, name }], labels: [{ id, name, color }] })` |
 | `getAgentInfo(cb)` | Lê o agente logado. | `cb(agent)` |
 | `getConversationInfo(cb)` | Lê a conversa atual. | `cb(conversation)`: o [payload](#payload-da-conversa). |
-| `ready()` | Avisa o Omni que sua página está escutando. O Omni reenvia a conversa. | nenhum |
+| `ready()` | Avisa o Omni que sua página está escutando. O Omni reenvia a conversa e, se houver segredo, o `context_token`. | nenhum |
 
 Só um callback pode ficar pendente por vez: chame o próximo getter dentro do callback anterior.
 
