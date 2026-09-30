@@ -171,7 +171,7 @@ The `conversation` and `thread` events come from the agent's browser and are not
   "plugin_id": "Xy7Qa2Lm",
   "workspace_id": "Pq4Rs8Tu",
   "conversation_id": "k5Qx8LmN",
-  "contact": { "id": "Rz3pW9aB", "name": "Ada Lovelace", "phone": "+55 11 99999-9999", "email": "ada@example.com" },
+  "contact": { "id": "Rz3pW9aB", "name": "Ada Lovelace", "phone": "+55 11 99999-9999", "email": "ada@example.com", "custom_attributes": { "botbot": "ada@example.com" } },
   "agent": { "id": "Jm2Yt7cD", "name": "Grace Hopper", "is_owner": false }
 }
 ```
